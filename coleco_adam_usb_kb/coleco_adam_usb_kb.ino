@@ -1,12 +1,14 @@
 /*
  * Nick Bild
  * June 2023
- * Use a Coleco Adam keyboard as a USB keyboard on a modern computer with the help of a Teensy 4.1.
+ * Use a Coleco Adam keyboard as a USB keyboard on a modern computer with the help of a Teensy 4.0 or 4.1
  *
  * Thanks to Mike McMahon for the code (https://gist.github.com/MMcM/36fed5189a22cd381af2c6e26cd922a6)
- * describing ADAMNet communications with a Teensy 3.2, which that portion of this work is heavily based on.
+ * describing ADAMNet communications with a Teensy 3.2, which that portion of this work is heavily based on
  *
- * Wiring for Teensy 4.1:
+ * Additional key mapping and cleanup by John Lundy
+ *
+ * Wiring for Teensy 4.0 or 4.1:
  * Teensy 1(TX1) -- RJ 1
  * Teensy 2   -- RJ 2 (optional)
  * Teensy GND -- RJ 3,4,5
@@ -15,7 +17,7 @@
 
 #include <Keyboard.h>
 
-// ADAMNet packet type definitions.
+// ADAMNet packet type definitions
 const uint8_t MN_RESET   = 0x01;  // command.control (reset)
 const uint8_t MN_STATUS  = 0x11;  // command.control (status)
 const uint8_t MN_ACK     = 0x21;  // command.control (ack)
@@ -30,29 +32,27 @@ const uint8_t NM_ACK     = 0x91;  // response.control (ack)
 const uint8_t NM_CANCEL  = 0xA1;  // response.control (cancel)
 const uint8_t NM_SEND    = 0xB1;  // response.data (send)
 const uint8_t NM_NACK    = 0xC1;  // response.control (nack)
-
 const uint32_t RECEIVE_INTERVAL = 10;
 static uint32_t last_receive_time = 0;
 uint8_t char_mappings[170];
 
-
 void setup() {
     setup_char_mappings();
 
-    // Hardware serial for interaction with Coleco keyboard.
+    // Hardware serial for interaction with Coleco keyboard
     Serial1.begin(62500, SERIAL_8N1_RXINV_TXINV | SERIAL_HALF_DUPLEX);
     Serial1.setTimeout(100);
 
-    // For Teensy to act as a USB keyboard.
+    // For Teensy to act as a USB keyboard
     Keyboard.begin();
 
-    // Hard reset signal.
+    // Hard reset signal
     pinMode(2, OUTPUT);
     digitalWrite(2, HIGH);
 
     delay(100);
     
-    // Soft reset.
+    // Soft reset
     send_command(MN_RESET);
 }
 
@@ -67,11 +67,11 @@ void loop() {
                 
                 if (receive_response(buf, 5) && buf[0] == NM_SEND) {
                     if (buf[1] == 0 && buf[2] == 1 && buf[3] == buf[4]) {
-                        // Checksum OK, we have received good data.  Send the keyboard an acknowledgement.
+                        // Checksum OK, we have received good data.  Send the keyboard an acknowledgement
                         delay(5);
                         send_command(MN_ACK);
 
-                        // buf[3] contains the ASCII code received from the keyboard.
+                        // buf[3] contains the ASCII code received from the keyboard
                         if (buf[3] == 39) {
                           Keyboard.write('\'');
                         } else {
@@ -80,12 +80,12 @@ void loop() {
 
                         last_receive_time = millis();
                     } else {
-                        // Transmission error.  Try again.
+                        // Transmission error.  Try again
                         send_command(MN_NACK);
                     }
                 }
             } else if (buf[0] == NM_NACK) {
-                // No input available, wait a bit.
+                // No input available, wait a bit
                 last_receive_time = millis();
             }
         }
@@ -94,7 +94,7 @@ void loop() {
 
 void send_command(uint8_t command) {
     Serial1.write(command);
-    Serial1.flush();       // Wait for transmit to complete.
+    Serial1.flush();       // Wait for transmit to complete
 }
 
 bool receive_response(uint8_t *buffer, uint8_t expected_length) {
@@ -103,9 +103,10 @@ bool receive_response(uint8_t *buffer, uint8_t expected_length) {
 }
 
 void keyboardOutput(uint8_t pressed) {
-  // Determine if any modifier keys were pressed.
-  int ctrl = 0;
-  int shift = 0;
+  // Determine if any modifier keys were pressed
+  bool ctrl = 0;
+  bool shift = 0;
+  bool alt = 0;
 
   // Shift
   if ((pressed > 59 && pressed < 91) || (pressed > 32 && pressed < 42) 
@@ -116,11 +117,17 @@ void keyboardOutput(uint8_t pressed) {
   if (pressed == 61) {
     shift = 0;
   }
+ 
+  // Alt
+  if (pressed == 144) { // Mapped Wild Card to Alt
+    alt = 1;
+  }
 
   // Control
   if (pressed > 0 and pressed < 27) {
     ctrl = 1;
   }
+
   if (pressed == 8 || pressed == 9 || pressed == 13) {
     ctrl = 0;
   }
@@ -131,27 +138,33 @@ void keyboardOutput(uint8_t pressed) {
     delay(10);
   }
 
+ if (alt) {
+    Keyboard.set_modifier(MODIFIERKEY_ALT);          
+    Keyboard.send_now();
+    delay(10);
+  }
+
   if (ctrl) {
     Keyboard.set_modifier(MODIFIERKEY_CTRL);          
     Keyboard.send_now();
     delay(10);
   }
 
-  // Simulate the USB key press.
+  // Simulate the USB key press
   Keyboard.set_key1(char_mappings[pressed]);
   Keyboard.send_now();
   delay(5);
 
-  // Clean up.
+  // Clean up
   Keyboard.set_modifier(0);
   Keyboard.set_key1(0);
   Keyboard.send_now();
 }
 
 void setup_char_mappings() {
-  // Map Adam key codes to Teensy key codes.
+  // Map Adam key codes to Teensy key codes
 
-  // Ctrl needs to be pressed.
+  // Ctrl needs to be pressed
   char_mappings[1] = KEY_A;
   char_mappings[2] = KEY_B;
   char_mappings[3] = KEY_C;
@@ -175,7 +188,6 @@ void setup_char_mappings() {
   char_mappings[24] = KEY_X;
   char_mappings[25] = KEY_Y;
   char_mappings[26] = KEY_Z;
-
   char_mappings[8] = KEY_BACKSPACE;
   char_mappings[9] = KEY_TAB;
   char_mappings[13] = KEY_ENTER;
@@ -188,7 +200,7 @@ void setup_char_mappings() {
   char_mappings[46] = KEY_PERIOD;
   char_mappings[47] = KEY_SLASH;
 
-  // These need shifted.
+  // These need shifted
   char_mappings[33] = KEY_1;
   char_mappings[35] = KEY_3;
   char_mappings[36] = KEY_4;
@@ -196,7 +208,6 @@ void setup_char_mappings() {
   char_mappings[38] = KEY_7;
   char_mappings[40] = KEY_9;
   char_mappings[41] = KEY_0;
-
   char_mappings[48] = KEY_0;
   char_mappings[49] = KEY_1;
   char_mappings[50] = KEY_2;
@@ -209,14 +220,11 @@ void setup_char_mappings() {
   char_mappings[57] = KEY_9;  
   char_mappings[59] = KEY_SEMICOLON;
   char_mappings[61] = KEY_EQUAL;
-
-  // These need shifted.
   char_mappings[58] = KEY_SEMICOLON;
   char_mappings[60] = KEY_COMMA;
   char_mappings[62] = KEY_PERIOD;
   char_mappings[63] = KEY_SLASH;
   char_mappings[64] = KEY_2;
-
   char_mappings[65] = KEY_A;
   char_mappings[66] = KEY_B;
   char_mappings[67] = KEY_C;
@@ -246,13 +254,9 @@ void setup_char_mappings() {
   char_mappings[91] = KEY_LEFT_BRACE;
   char_mappings[92] = KEY_BACKSLASH;
   char_mappings[93] = KEY_RIGHT_BRACE;
-
-  // These need shifted.
   char_mappings[94] = KEY_6; 
   char_mappings[95] = KEY_MINUS;
-  
   char_mappings[96] = KEY_TILDE;
-
   char_mappings[97] = KEY_A;
   char_mappings[98] = KEY_B;
   char_mappings[99] = KEY_C;
@@ -279,15 +283,34 @@ void setup_char_mappings() {
   char_mappings[120] = KEY_X;
   char_mappings[121] = KEY_Y;
   char_mappings[122] = KEY_Z;
-
-  // These need shifted.
   char_mappings[123] = KEY_LEFT_BRACE;
   char_mappings[124] = KEY_BACKSLASH;
   char_mappings[125] = KEY_RIGHT_BRACE;
 
+  // Regular and special ADAM mapped keys
+  char_mappings[27] = KEY_ESC;
   char_mappings[126] = KEY_TILDE;
   char_mappings[127] = KEY_DELETE;
-
+  char_mappings[128] = KEY_HOME;
+  char_mappings[129] = KEY_F1;
+  char_mappings[130] = KEY_F2;
+  char_mappings[131] = KEY_F3;
+  char_mappings[132] = KEY_F4;
+  char_mappings[133] = KEY_F5;
+  char_mappings[134] = KEY_F6;
+  char_mappings[137] = KEY_F7;  // Shift F1
+  char_mappings[138] = KEY_F8;  // Shift F2
+  char_mappings[139] = KEY_F9;  // Shift F3
+  char_mappings[140] = KEY_F10;  // Shift F4
+  char_mappings[141] = KEY_F11;  // Shift F5
+  char_mappings[142] = KEY_F12;  // Shift F6
+  char_mappings[145] = KEY_PAUSE;  // Mapped Undo to Pause
+  char_mappings[146] = KEY_PAGE_UP;  // Mapped Move/Copy to Page Up
+  char_mappings[147] = KEY_PAGE_DOWN;  // Mapped Store/Get to Page Down
+  char_mappings[148] = KEY_INSERT; 
+  char_mappings[149] = KEY_PRINTSCREEN;
+  char_mappings[150] = KEY_END;  // Mapped Clear to End
+  char_mappings[151] = KEY_DELETE;     
   char_mappings[160] = KEY_UP;
   char_mappings[161] = KEY_RIGHT;
   char_mappings[162] = KEY_DOWN;
