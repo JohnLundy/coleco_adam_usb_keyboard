@@ -1,43 +1,71 @@
-# USB Coleco Adam Keyboard
+# **USB Coleco Adam Keyboard Adapter**
 
-This adapter enables an unmodified Coleco Adam keyboard to work as a USB keyboard on any modern computer.
+This adapter enables an unmodified Coleco Adam keyboard to work as a USB keyboard on any modern computer. This is great option for using the keyboard with PC ADAM emulators. The Coleco Adam keyboard was considered one of the best keyboards of its time with its modern layout and build quality.
 
-The Coleco Adam was a short-lived home computer of the early 1980s.  It launched with a number of problems, and many units were defective, so it quickly earned a bad reputation and sold poorly before being discontinued after little more than one year on the market.  Many attribute the downfall of Coleco to the losses taken on the Adam computer.
+This is a fork of the original project developed by Nick A. Bild found here [USB Coleco Adam Keyboard](https://github.com/nickbild/coleco_adam_usb_keyboard)
 
-But despite these problems, the Adam did have a pretty amazing keyboard for the era.  Unlike the many keyboards with membrane keys that were sized for the hands of a toddler, the Adam keyboard is well-built and very nice to type on.  Aside from a few odd outliers, the keyboard also has a very modern layout that is immediately familiar to a modern computer user.
 
-I do not have an Adam computer, but I do have an Adam keyboard, and I really want to use it, so I built this USB adapter.
-
-![](https://raw.githubusercontent.com/nickbild/coleco_adam_usb_keyboard/main/media/full_kb_sm.jpg)
+![](https://github.com/JohnLundy/coleco_adam_usb_keyboard/raw/main/media/20230731_202517%20-%20small.jpg)
 
 ## How It Works
 
-The weirdness of the Adam extends to all of its peripherals, including the keyboard.  Instead of a typical keyboard of the time that arranged the keys into a matrix of switches that triggered pins on an interface chip when they were closed, Coleco designed a communications protocol called AdamNet.  The keyboard connects to the computer via an RJ-12 connector with a single data line that communicates over a 62.5 kbit/s half-duplex serial bus.  It contains its own Motorola 6801 microcontroller to cache key presses and send them to the main computer when it asks for them by sending a series of commands via the AdamNet protocol.
+Unlike a typical keyboard of its time that arranged the keys into a matrix of switches that triggered pins on an interface chip when they were closed, Coleco designed a communications protocol called ADAMnet. The keyboard connects to the computer via an RJ-12 connector with a single data line that communicates over a 62.5 kbit/s half-duplex serial bus. It contains its own Motorola 6801 microcontroller to cache key presses and send them to the main computer when it asks for them by sending a series of commands via the ADAMnet protocol.
 
-I developed an [Arduino sketch](https://github.com/nickbild/coleco_adam_usb_keyboard/blob/main/coleco_adam_usb_kb/coleco_adam_usb_kb.ino) for the Teensy 4.1 microcontroller development board that communicates with the keyboard via AdamNet to acquire keystrokes, then they are translated into the appropriate key codes and sent to the host computer as if the Teensy was a USB keyboard (be sure to set serial mode to "Keyboard" in Arduino IDE).  Modifier keys like "shift" and "control" are supported.
+This project uses a Teensy 4.x microcontroller development board that communicates with the keyboard via ADAMnet to acquire keystrokes, then they are translated into the appropriate key codes and sent to the host computer as if the Teensy was a USB keyboard (be sure to set serial mode to "Keyboard" in Arduino IDE).  Modifier keys like "SHIFT", "CONTROL", and "ALT (Mapped to ESCAPE/WP)" are supported. Note that the ADAM keyboard doesn't have the ability to just select the "CONTROL" key by itself without having a combination of an alphnumeric key pressed at the same time. _This behavior makes it impossible to do a combination of "CONTROL-ALT-DELETE" like a standard PC keyboard_.
 
-I have not mapped some of the keyboard's special keys, like "Store/Get," "Wildcard," or the six "smart" keys at the top, but it would be fairly trivial to map these to any key desired with a small edit.
+The ADAM keyboard is powered directly by the PC by way of the TEENSY 5V (VIN) line.
 
-Wiring:
+**Mapping of the keyboard's special keys are as follows:**
+| ADAM MAPPED KEY | PC KEY |
+| ------ | ------ |
+| ESC | ESC |
+| WILD CARD | ALT |
+| DEL | DEL |
+| HOME | HOME |
+| I | F1 |
+| II | F2 |
+| III | F3 |
+| IV | F4 |
+| V | F5 |
+| VI | F6 |
+| <SHIFT> + I | F7 | 
+| <SHIFT> + II | F8 |
+| <SHIFT> + III | F9 | 
+| <SHIFT> + IV | F10 | 
+| <SHIFT> + V | F11 | 
+| <SHIFT> + VI | F12 | 
+| UNDO | PAUSE |
+| MOVE/COPY | PAGE UP |
+| STORE/GET | PAGE DOWN |
+| INSERT | INSERT |
+| PRINT | PRINT SCREEN |
+| CLEAR | END |
 
-- Pin 1 — RJ 1
-- Pin 2 — RJ 2
-- GND — RJ 3,4,5
-- VIN (+5V) — RJ 6
+**Wiring:**
+| TEENSY PIN | RJ12 PIN | ADAMnet SIGNAL |
+| ------ | ------ | ------ |
+| PIN-1 | RJ12-1 | DATA |
+| PIN-2 | RJ12-2 | RESET|
+| GND   |  RJ12-3,4,5 | GND |
+| +5 (VIN) | RJ12-6 | POWER |
+
+## Schematic
+
+Coming soon
 
 ## Media
 
-Demo video: [YouTube](https://www.youtube.com/watch?v=ww-IH-VO8OQ)
-
-![](https://raw.githubusercontent.com/nickbild/coleco_adam_usb_keyboard/main/media/attached_close_sm.jpg)
-
-![](https://raw.githubusercontent.com/nickbild/coleco_adam_usb_keyboard/main/media/adapter_sm.jpg)
+![](https://github.com/JohnLundy/coleco_adam_usb_keyboard/raw/main/media/20230731_202645%20-%20small.jpg)
 
 ## Bill of Materials
 
-- 1 x Teensy 4.1 microcontroller
-- 1 x RJ-12 breakout connector
+- 1 x  &nbsp; Teensy 4.0 or 4.1 Microcontroller Development Board
+- 1 x  &nbsp; RJ-12 Breakout Connector Board
+- 1 x  &nbsp; 2.2K Resistor (used as a voltage divider to safely drop the +5v ADAM data to 3v for the Teensy)
+- 1 x  &nbsp; 3.3K Resistor (used as a voltage divider to safely drop the +5v ADAM data to 3v for the Teensy)
+- 1 x  &nbsp; ESD Suppressor / TVS Diode **(OPTIONAL)** &nbsp;P/N# PESD1FLEX,215 or equivelent
+- 1 X  &nbsp; 10uF Capacitor **(OPTIONAL)**
 
-## About the Author
+## License
 
-[Nick A. Bild, MS](https://nickbild79.firebaseapp.com/#!/)
+GNU General Public License v3.0
