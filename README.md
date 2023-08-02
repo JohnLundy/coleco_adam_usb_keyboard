@@ -28,12 +28,12 @@ The ADAM keyboard is powered directly by the PC by way of the TEENSY 5V (VIN) li
 | IV | F4 |
 | V | F5 |
 | VI | F6 |
-| <SHIFT> + I | F7 | 
-| <SHIFT> + II | F8 |
-| <SHIFT> + III | F9 | 
-| <SHIFT> + IV | F10 | 
-| <SHIFT> + V | F11 | 
-| <SHIFT> + VI | F12 | 
+| SHIFT + I | F7 | 
+| SHIFT + II | F8 |
+| SHIFT + III | F9 | 
+| SHIFT + IV | F10 | 
+| SHIFT + V | F11 | 
+| SHIFT + VI | F12 | 
 | UNDO | PAUSE |
 | MOVE/COPY | PAGE UP |
 | STORE/GET | PAGE DOWN |
