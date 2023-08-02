@@ -51,7 +51,7 @@ The ADAM keyboard is powered directly by the PC by way of the TEENSY 5V (VIN) li
 
 ## Schematic
 
-Coming soon
+![](https://github.com/JohnLundy/coleco_adam_usb_keyboard/raw/main/media/Schematic.jpg)
 
 ## Media
 
@@ -64,7 +64,7 @@ Coming soon
 - 1 x  &nbsp; 2.2K Resistor (used as a voltage divider to safely drop the +5v ADAM data to 3v for the Teensy)
 - 1 x  &nbsp; 3.3K Resistor (used as a voltage divider to safely drop the +5v ADAM data to 3v for the Teensy)
 - 1 x  &nbsp; ESD Suppressor / TVS Diode **(OPTIONAL)** &nbsp;P/N# PESD1FLEX,215 or equivelent
-- 1 X  &nbsp; 10uF Capacitor **(OPTIONAL)**
+- 1 x  &nbsp; 10uF Capacitor **(OPTIONAL)**
 
 ## License
 
