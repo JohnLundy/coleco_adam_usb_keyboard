@@ -61,7 +61,7 @@ The ADAM keyboard is powered directly by the PC by way of the TEENSY 5V (VIN) li
 
 - 1 x  &nbsp; Teensy 4.0 or 4.1 Microcontroller Development Board
 - 1 x  &nbsp; RJ-12 Breakout Connector Board
-- 1 x  &nbsp; 2.2K Resistor (used as a voltage divider to safely drop the +5v ADAM data to 3v for the Teensy)
+- 1 x  &nbsp; 1.5K Resistor (used as a voltage divider to safely drop the +5v ADAM data to 3v for the Teensy)
 - 1 x  &nbsp; 3.3K Resistor (used as a voltage divider to safely drop the +5v ADAM data to 3v for the Teensy)
 - 1 x  &nbsp; ESD Suppressor / TVS Diode **(OPTIONAL)** &nbsp;P/N# PESD1FLEX,215 or equivelent
 - 1 x  &nbsp; 10uF Capacitor **(OPTIONAL)**
