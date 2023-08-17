@@ -66,6 +66,10 @@ The ADAM keyboard is powered directly by the PC by way of the TEENSY 5V (VIN) li
 - 1 x  &nbsp; ESD Suppressor / TVS Diode **(OPTIONAL)** &nbsp;P/N# PESD1FLEX,215 or equivelent
 - 1 x  &nbsp; 10uF Capacitor **(OPTIONAL)**
 
+## PCB (gerbers and BOM in Build Files)
+
+![](https://github.com/JohnLundy/coleco_adam_usb_keyboard/blob/main/media/20230817_110857%20-%20small.jpg)
+
 ## License
 
 GNU General Public License v3.0
